@@ -1,0 +1,10 @@
+{
+  "name": "RouteSafe Weather-Aware Navigation",
+  "short_name": "RouteSafe",
+  "description": "Weather monitoring, route planning and road incident reporting.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#071426",
+  "theme_color": "#071426",
+  "icons": []
+}
