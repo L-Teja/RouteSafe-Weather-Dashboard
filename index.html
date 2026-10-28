@@ -4,295 +4,389 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#071426">
-  <meta name="description" content="RouteSafe weather-aware navigation and road incident dashboard">
-  <title>RouteSafe | Smart Navigation</title>
+  <meta name="description" content="RouteSafe weather-aware navigation, street routing, voice assistance and road incident reporting.">
+  <title>RouteSafe | Weather-Aware Navigation</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
 </head>
+
 <body>
   <header class="topbar">
-    <a class="brand" href="#">
+    <a href="#" class="brand">
       <span class="brand-icon">⌁</span>
-      <span>Route<span class="accent">Safe</span>
+      <span>
+        <strong>RouteSafe</strong>
         <small>WEATHER-AWARE NAVIGATION</small>
       </span>
     </a>
-    <div class="header-status">
-      <span id="connectionStatus" class="status online">● Online</span>
-      <span id="lastUpdated">Weather loading...</span>
-      <button id="voiceToggle" class="btn btn-outline">🔊 Voice</button>
-      <button id="refreshBtn" class="btn btn-primary">↻ Refresh</button>
+
+    <div class="topbar-status">
+      <span class="status-dot"></span>
+      <span id="connectionStatus">Checking connection…</span>
     </div>
+
+    <button id="refreshBtn" class="button button-primary" type="button">
+      ↻ Refresh weather
+    </button>
   </header>
 
-  <main class="container">
-    <section class="welcome">
-      <div>
-        <p class="eyebrow">SMART MOBILITY & WEATHER INTELLIGENCE</p>
-        <h1>Travel smarter. <span class="accent">Stay safer.</span></h1>
-        <p class="muted">Weather conditions, road navigation and community incident reports in one dashboard.</p>
-      </div>
-      <div class="city-control">
-        <label for="citySelect">Monitoring location</label>
-        <select id="citySelect"></select>
-      </div>
-    </section>
-
-    <section class="stats-grid">
-      <article class="stat-card">
-        <div class="stat-heading">Temperature <span>🌡️</span></div>
-        <div class="stat-value" id="temperature">--°C</div>
-        <div class="stat-foot" id="feelsLike">Feels like --°C</div>
-      </article>
-      <article class="stat-card">
-        <div class="stat-heading">Humidity <span>💧</span></div>
-        <div class="stat-value" id="humidity">--%</div>
-        <div class="stat-foot">Relative humidity</div>
-      </article>
-      <article class="stat-card">
-        <div class="stat-heading">Wind speed <span>🌬️</span></div>
-        <div class="stat-value" id="wind">-- <small>km/h</small></div>
-        <div class="stat-foot" id="windDirection">Wind direction unavailable</div>
-      </article>
-      <article class="stat-card">
-        <div class="stat-heading">Precipitation <span>🌧️</span></div>
-        <div class="stat-value" id="rain">-- <small>mm</small></div>
-        <div class="stat-foot" id="rainProbability">Rain probability --%</div>
-      </article>
-    </section>
-
-    <section class="panel section-gap alert-panel" id="liveWeatherAlerts">
-      <div class="panel-header">
-        <div>
-          <h2>Weather alerts &amp; hazard zones</h2>
-          <p class="muted">Forecast-derived alerts for the selected city and time window</p>
-        </div>
-        <span class="panel-icon">⚠</span>
-      </div>
-      <div class="alert-toolbar">
-        <div>
-          <label for="alertSession">Alert time window</label>
-          <select id="alertSession">
-            <option value="current">Current conditions</option>
-            <option value="today">Remaining today</option>
-            <option value="next24" selected>Next 24 hours</option>
-            <option value="next48">Next 48 hours</option>
-          </select>
-        </div>
-        <button id="enableNotifications" class="btn btn-outline" type="button">Enable notifications</button>
-      </div>
-      <p id="liveAlertSummary" class="message" aria-live="polite">Loading weather alerts…</p>
-      <div id="dynamicAlertList" class="alert-list">
-        <p class="muted">Alerts will appear when weather data is available.</p>
-      </div>
-      <p class="alert-footnote">
-        These are automated threshold-based estimates from Open-Meteo forecast data, not official warnings.
-        The map zone is a schematic city-level indicator, not a measured hazard boundary. Check official
-        IMD and local authority alerts before travelling.
-      </p>
-      <div class="zone-legend">
-        <span><i class="zone-dot zone-low"></i> Watch</span>
-        <span><i class="zone-dot zone-medium"></i> Caution</span>
-        <span><i class="zone-dot zone-high"></i> High concern</span>
-      </div>
-    </section>
-
-    <section class="content-grid">
-      <article class="panel map-panel">
-        <div class="panel-header">
+  <main class="app-layout">
+    <aside class="sidebar">
+      <section class="panel location-panel">
+        <div class="section-heading">
           <div>
-            <h2>Navigation map</h2>
-            <p class="muted">Explore roads, weather and reported incidents</p>
+            <span class="eyebrow">LOCATION</span>
+            <h2>Weather dashboard</h2>
           </div>
-          <button class="btn btn-outline" id="resetMap">Reset map</button>
+          <span class="icon-pill">☀</span>
         </div>
-        <div class="map-filters">
-          <label><input type="checkbox" id="showCities" checked> Cities</label>
-          <label><input type="checkbox" id="showIncidents" checked> Incidents</label>
-          <label><input type="checkbox" id="showRoute" checked> Routes</label>
-        </div>
-        <div id="map" aria-label="Interactive navigation map"></div>
-        <p class="map-note">Map © OpenStreetMap contributors. Weather and route availability depend on external services.</p>
-      </article>
 
-      <aside class="panel route-panel">
-        <div class="panel-header">
+        <label for="citySelect">Select city</label>
+        <select id="citySelect" class="field"></select>
+
+        <div class="weather-main">
           <div>
-            <h2>Plan your journey</h2>
-            <p class="muted">Calculate a road-based route</p>
+            <p id="weatherDescription" class="muted">Current conditions</p>
+            <div id="temperature" class="temperature">--°C</div>
+            <p id="feelsLike" class="muted">Feels like --°C</p>
           </div>
-          <span class="panel-icon">↗</span>
+          <div id="weatherEmoji" class="weather-emoji">🌤️</div>
         </div>
 
-        <form id="routeForm">
-          <label for="origin">Starting location</label>
-          <div class="input-row">
-            <input id="origin" placeholder="e.g. Guntur, Andhra Pradesh" required>
-            <button class="btn btn-outline" id="useLocation" type="button" title="Use current location">◎</button>
+        <p id="lastUpdated" class="muted small">Waiting for weather data…</p>
+
+        <div class="weather-grid">
+          <article class="metric-card">
+            <span>Humidity</span>
+            <strong id="humidity">--%</strong>
+          </article>
+          <article class="metric-card">
+            <span>Wind speed</span>
+            <strong id="wind">-- <small>km/h</small></strong>
+            <small id="windDirection">--</small>
+          </article>
+          <article class="metric-card">
+            <span>Precipitation</span>
+            <strong id="rain">-- <small>mm</small></strong>
+            <small id="rainProbability">--</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">VOICE ASSISTANT</span>
+            <h2>Weather by voice</h2>
           </div>
-          <label for="destination">Destination</label>
-          <input id="destination" placeholder="Enter destination or village" required>
-          <label for="travelMode">Travel mode</label>
-          <select id="travelMode">
-            <option value="driving">Car</option>
-            <option value="cycling">Bicycle</option>
-            <option value="walking">Walking</option>
-          </select>
-          <button class="btn btn-primary full-width" type="submit" id="routeBtn">Find available routes →</button>
+          <span class="icon-pill">♫</span>
+        </div>
+
+        <p class="muted">
+          Listen to current weather conditions and the forecast.
+        </p>
+
+        <div class="button-row">
+          <button id="readWeather" class="button button-primary" type="button">
+            🔊 Read weather
+          </button>
+          <button id="readForecast" class="button button-secondary" type="button">
+            Forecast
+          </button>
+        </div>
+
+        <div class="button-row">
+          <button id="voiceToggle" class="button button-secondary" type="button">
+            🎙 Voice commands
+          </button>
+          <button id="muteVoice" class="button button-secondary" type="button">
+            🔇 Stop voice
+          </button>
+        </div>
+
+        <label for="voiceLanguage">Speech language</label>
+        <select id="voiceLanguage" class="field">
+          <option value="en-IN">English (India)</option>
+          <option value="en-US">English (US)</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="te-IN">Telugu</option>
+        </select>
+
+        <label for="speechRate">Speech speed</label>
+        <input id="speechRate" type="range" min="0.7" max="1.3" step="0.1" value="1">
+
+        <p id="voiceStatus" class="status-message" aria-live="polite">
+          Voice assistant ready.
+        </p>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">WEATHER OUTLOOK</span>
+            <h2>Hourly forecast</h2>
+          </div>
+        </div>
+        <div id="hourlyForecast" class="hourly-forecast">
+          <p class="muted">Forecast will appear here.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">NEXT 7 DAYS</span>
+            <h2>Daily forecast</h2>
+          </div>
+        </div>
+        <div id="dailyForecast" class="daily-forecast">
+          <p class="muted">Forecast will appear here.</p>
+        </div>
+      </section>
+
+      <section class="panel alerts-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">TRAVEL CONDITIONS</span>
+            <h2>Weather alerts</h2>
+          </div>
+          <span class="icon-pill warning-icon">!</span>
+        </div>
+
+        <label for="alertSession">Alert time window</label>
+        <select id="alertSession" class="field">
+          <option value="current">Current conditions</option>
+          <option value="today" selected>Rest of today</option>
+          <option value="next24">Next 24 hours</option>
+          <option value="next48">Next 48 hours</option>
+        </select>
+
+        <p id="liveAlertSummary" class="muted">
+          Weather alerts will appear here.
+        </p>
+
+        <div id="dynamicAlertList" class="alert-list"></div>
+
+        <button id="enableNotifications" class="button button-secondary" type="button">
+          Enable notifications
+        </button>
+      </section>
+    </aside>
+
+    <section class="main-content">
+      <section class="welcome-row">
+        <div>
+          <span class="eyebrow">SMART MOBILITY</span>
+          <h1>Plan a safer journey.</h1>
+          <p class="muted">
+            Explore mapped streets and plan a route using current weather information.
+          </p>
+        </div>
+        <div class="map-badge">LIVE MAP</div>
+      </section>
+
+      <section class="panel route-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">ROUTE PLANNER</span>
+            <h2>Where do you want to go?</h2>
+          </div>
+        </div>
+
+        <form id="routeForm" class="route-form">
+          <div class="route-fields">
+            <div class="field-group">
+              <label for="origin">Starting point</label>
+              <input
+                id="origin"
+                class="field"
+                type="text"
+                placeholder="City, street or coordinates"
+                required
+              >
+            </div>
+
+            <div class="field-group">
+              <label for="destination">Destination</label>
+              <input
+                id="destination"
+                class="field"
+                type="text"
+                placeholder="City, street or coordinates"
+                required
+              >
+            </div>
+
+            <div class="field-group">
+              <label for="travelMode">Travel mode</label>
+              <select id="travelMode" class="field">
+                <option value="driving">🚗 Driving</option>
+                <option value="cycling">🚲 Cycling</option>
+                <option value="walking">🚶 Walking</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="button-row route-actions">
+            <button class="button button-primary" type="submit">
+              Find route
+            </button>
+            <button id="useLocation" class="button button-secondary" type="button">
+              ◎ Use my location
+            </button>
+            <button id="resetMap" class="button button-secondary" type="button">
+              Reset map
+            </button>
+          </div>
         </form>
 
-        <div id="routeMessage" class="message" aria-live="polite">Enter your starting point and destination.</div>
-        <div id="routeResults"></div>
+        <p id="routeMessage" class="status-message" aria-live="polite">
+          Enter your starting point and destination to plan a route.
+        </p>
 
-        <div id="navigationControls" class="navigation-controls hidden">
-          <h3>Voice navigation</h3>
+        <div id="routeResults" class="route-results"></div>
+
+        <section id="navigationControls" class="navigation-panel hidden">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">TURN-BY-TURN</span>
+              <h3>Navigation assistant</h3>
+            </div>
+          </div>
+
+          <p id="nextInstruction" class="next-instruction">
+            Choose a route to begin.
+          </p>
+
           <div class="button-row">
-            <button id="startNavigation" class="btn btn-primary">▶ Start</button>
-            <button id="pauseNavigation" class="btn btn-outline">Ⅱ Pause</button>
-            <button id="stopNavigation" class="btn btn-outline">■ Stop</button>
+            <button id="startNavigation" class="button button-primary" type="button">
+              ▶ Start
+            </button>
+            <button id="pauseNavigation" class="button button-secondary" type="button">
+              Ⅱ Pause
+            </button>
+            <button id="repeatInstruction" class="button button-secondary" type="button">
+              ↻ Repeat
+            </button>
+            <button id="stopNavigation" class="button button-danger" type="button">
+              ■ Stop
+            </button>
           </div>
-          <p id="nextInstruction" class="muted" aria-live="polite">No active navigation.</p>
-          <ol id="turnList" class="turn-list"><li>Calculate a route to load turn-by-turn steps.</li></ol>
-          <button id="repeatInstruction" class="btn btn-outline full-width">🔊 Repeat instruction</button>
-        </div>
-      </aside>
-    </section>
 
-    <section class="content-grid lower-grid">
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>24-hour forecast</h2>
-            <p class="muted">Temperature and precipitation outlook</p>
-          </div>
-        </div>
-        <div id="hourlyForecast" class="hourly-grid"><p class="muted">Loading forecast...</p></div>
-      </article>
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>7-day forecast</h2>
-            <p class="muted">Daily minimum and maximum temperature</p>
-          </div>
-        </div>
-        <div id="dailyForecast" class="daily-list"><p class="muted">Loading forecast...</p></div>
-      </article>
-    </section>
+          <ol id="turnList" class="turn-list"></ol>
+        </section>
+      </section>
 
-    <section class="panel section-gap">
-      <div class="panel-header">
-        <div>
-          <h2>Report a road incident</h2>
-          <p class="muted">Submit a local report for this browser</p>
+      <section class="panel map-panel">
+        <div class="section-heading map-heading">
+          <div>
+            <span class="eyebrow">STREET EXPLORER</span>
+            <h2>City streets and routes</h2>
+            <p class="muted">
+              Pan, zoom, select a map point, and explore mapped roads.
+            </p>
+          </div>
+          <div class="map-controls">
+            <label class="check-label">
+              <input id="showCities" type="checkbox" checked>
+              Cities
+            </label>
+            <label class="check-label">
+              <input id="showIncidents" type="checkbox" checked>
+              Incidents
+            </label>
+            <label class="check-label">
+              <input id="showRoute" type="checkbox" checked>
+              Route
+            </label>
+          </div>
         </div>
-        <span class="panel-icon">⚠</span>
-      </div>
-      <form id="incidentForm" class="incident-form">
-        <div>
-          <label for="incidentType">Incident type</label>
-          <select id="incidentType" required>
-            <option value="Pothole">Pothole</option>
-            <option value="Damaged road">Damaged road</option>
-            <option value="Waterlogging">Waterlogging</option>
-            <option value="Flooded road">Flooded road</option>
-            <option value="Road closure">Road closure</option>
-            <option value="Construction">Construction</option>
-            <option value="Traffic congestion">Traffic congestion</option>
-            <option value="Fallen tree">Fallen tree</option>
-            <option value="Broken streetlight">Broken streetlight</option>
-            <option value="Landslide">Landslide</option>
-            <option value="Snow or ice">Snow or ice</option>
-            <option value="Accident or obstruction">Accident or obstruction</option>
-            <option value="Other weather hazard">Other weather hazard</option>
+
+        <div id="map" class="map"></div>
+
+        <p class="map-footnote">
+          Street and path coverage depends on OpenStreetMap data availability.
+          Always follow local signs and road rules.
+        </p>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">COMMUNITY SAFETY</span>
+            <h2>Report a road incident</h2>
+          </div>
+        </div>
+
+        <form id="incidentForm" class="incident-form">
+          <div class="field-group">
+            <label for="incidentType">Incident type</label>
+            <select id="incidentType" class="field">
+              <option value="flooding">Flooding / waterlogging</option>
+              <option value="pothole">Pothole / damaged road</option>
+              <option value="accident">Accident</option>
+              <option value="closure">Road closure</option>
+              <option value="obstruction">Road obstruction</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="incidentLocation">Location</label>
+            <input
+              id="incidentLocation"
+              class="field"
+              type="text"
+              placeholder="Street or nearby landmark"
+              required
+            >
+          </div>
+
+          <div class="field-group">
+            <label for="incidentDescription">Description</label>
+            <textarea
+              id="incidentDescription"
+              class="field"
+              rows="3"
+              placeholder="Describe what you observed"
+              required
+            ></textarea>
+          </div>
+
+          <button class="button button-primary" type="submit">
+            Submit report
+          </button>
+        </form>
+
+        <div class="incident-filter-row">
+          <label for="incidentFilter">Show reports</label>
+          <select id="incidentFilter" class="field">
+            <option value="all">All reports</option>
+            <option value="flooding">Flooding</option>
+            <option value="pothole">Potholes</option>
+            <option value="accident">Accidents</option>
+            <option value="closure">Closures</option>
+            <option value="obstruction">Obstructions</option>
+            <option value="other">Other</option>
           </select>
         </div>
-        <div>
-          <label for="incidentSeverity">Severity</label>
-          <select id="incidentSeverity">
-            <option value="Low">Low</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="High">High</option>
-          </select>
-        </div>
-        <div class="wide-field">
-          <label for="incidentLocation">Incident location</label>
-          <input id="incidentLocation" placeholder="Street, town or nearby landmark" required>
-        </div>
-        <div class="wide-field">
-          <label for="incidentDescription">Description</label>
-          <textarea id="incidentDescription" rows="3" placeholder="Describe the issue (optional)"></textarea>
-        </div>
-        <div class="wide-field">
-          <label for="incidentPhoto">Photo (optional)</label>
-          <input id="incidentPhoto" type="file" accept="image/jpeg,image/png,image/webp">
-          <small class="muted">Maximum 2 MB. Photos are stored locally with this prototype.</small>
-        </div>
-        <div class="wide-field">
-          <button type="submit" class="btn btn-primary">＋ Submit incident</button>
-        </div>
-      </form>
 
-      <div class="incident-list-header">
-        <h3>Recent reports</h3>
-        <select id="incidentFilter" aria-label="Filter incidents">
-          <option value="All">All reports</option>
-          <option value="New">New</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-      </div>
-      <div id="incidentList"></div>
+        <div id="incidentList" class="incident-list"></div>
+      </section>
+
+      <footer class="footer">
+        <p>RouteSafe · Weather-aware travel planning</p>
+        <p>Forecasts and community reports are informational, not official emergency alerts.</p>
+      </footer>
     </section>
-
-    <section class="panel section-gap">
-      <div class="panel-header">
-        <div>
-          <h2>Voice weather assistant</h2>
-          <p class="muted">Listen to the selected city's available weather data</p>
-        </div>
-      </div>
-      <div class="voice-panel">
-        <label for="speechLanguage">Language</label>
-        <select id="speechLanguage">
-          <option value="en-IN">English (India)</option>
-          <option value="te-IN">Telugu (if supported by your browser)</option>
-          <option value="hi-IN">Hindi (India)</option>
-        </select>
-        <label for="speechRate">Speech rate</label>
-        <input id="speechRate" type="range" min="0.7" max="1.4" step="0.1" value="1">
-        <div class="button-row">
-          <button id="readWeather" class="btn btn-primary">🔊 Read weather</button>
-          <button id="readForecast" class="btn btn-outline">Read forecast</button>
-          <button id="muteVoice" class="btn btn-outline">Mute / stop</button>
-        </div>
-        <p id="voiceStatus" class="muted" aria-live="polite">Voice assistance is available when supported by your browser.</p>
-      </div>
-    </section>
-
-    <section class="panel section-gap">
-      <div class="panel-header">
-        <div>
-          <h2>Safety and data quality</h2>
-          <p class="muted">Understand what the dashboard can and cannot verify</p>
-        </div>
-      </div>
-      <div class="safety-grid">
-        <div class="safety-item"><span>☀️</span><h3>Heat safety</h3><p>Drink water, seek shade and reduce strenuous activity during peak heat.</p></div>
-        <div class="safety-item"><span>🌧️</span><h3>Heavy rainfall</h3><p>Do not enter flooded roads. Rain forecasts do not confirm road flooding.</p></div>
-        <div class="safety-item"><span>🚧</span><h3>Road reports</h3><p>Community reports are unverified until checked by a trusted source.</p></div>
-        <div class="safety-item"><span>📡</span><h3>Data limitations</h3><p>Missing live data must not be interpreted as proof that conditions are safe.</p></div>
-      </div>
-      <p class="muted">For emergencies in India, call 112 where available. Follow official meteorological and local disaster-management advisories.</p>
-    </section>
-
-    <footer>
-      <span>RouteSafe © 2026</span>
-      <span>Weather: Open-Meteo · Maps: OpenStreetMap · Routing: OSRM</span>
-    </footer>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
